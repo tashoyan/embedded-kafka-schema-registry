@@ -1,7 +1,9 @@
 package net.manub.embeddedkafka.schemaregistry
 
 import java.nio.file.{Files, Path}
+import java.util.Properties
 
+import io.confluent.rest.RestConfig
 import net.manub.embeddedkafka.ops.{EmbeddedKafkaOps, RunningEmbeddedKafkaOps}
 import net.manub.embeddedkafka.schemaregistry.ops.{
   RunningSchemaRegistryOps,
@@ -87,11 +89,17 @@ object EmbeddedKafka
 
     val kafkaBroker = startKafka(configWithUsedZooKeeperPort, kafkaLogsDir)
 
+    val properties: Properties = new Properties
+    properties.put(
+      RestConfig.LISTENERS_CONFIG,
+      s"http://localhost:${configWithUsedZooKeeperPort.schemaRegistryPort}"
+    )
     val restApp = EmbeddedSR(
       startSchemaRegistry(
         configWithUsedZooKeeperPort.schemaRegistryPort,
         configWithUsedZooKeeperPort.zooKeeperPort,
-        configWithUsedZooKeeperPort.avroCompatibilityLevel
+        configWithUsedZooKeeperPort.avroCompatibilityLevel,
+        properties
       )
     )
 
